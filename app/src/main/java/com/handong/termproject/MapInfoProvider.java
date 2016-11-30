@@ -26,6 +26,7 @@ public class MapInfoProvider extends ContentProvider {
     private static final UriMatcher uriMatcher;
 
     public static final String KEY_ID = "_id";
+    public static final String KEY_NAME = "name";
     public static final String KEY_LATITUDE = "latitude";
     public static final String KEY_LONGITUDE = "longitude";
 

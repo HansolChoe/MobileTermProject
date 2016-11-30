@@ -3,9 +3,11 @@ package com.handong.termproject;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
@@ -42,7 +44,7 @@ public class MapsActivity extends Activity implements
     LocationManager locationManager;
     MapFragment mapFragment;
     boolean setGPS = false;
-    LatLng SEOUL = new LatLng(37.56, 126.97);
+    LatLng SEOUL = new LatLng(37.57396, 126.976786); // 광화문 광장
 
     // related to db
     public static final String DB_NAME = "map.db";
@@ -262,21 +264,54 @@ public class MapsActivity extends Activity implements
                 Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
                 if ( location == null)
                     return;
-
+                /*
                 // Make Mark at the current position
                 LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                 MarkerOptions markerOptions = new MarkerOptions();
                 markerOptions.position(latLng);
                 markerOptions.title("Current Position");
                 googleMap.addMarker(markerOptions);
+                */
 
+                ContentResolver resolver = getContentResolver();
+                String[] projection = new String[]{MapInfoProvider.KEY_ID, MapInfoProvider.KEY_NAME ,MapInfoProvider.KEY_LATITUDE,
+                        MapInfoProvider.KEY_LONGITUDE};
+                Cursor cursor =
+                        resolver.query(MapInfoProvider.CONTENT_URI,
+                                projection,
+                                null,
+                                null,
+                                null);
+
+
+                if (cursor.moveToFirst()) {
+                    LatLng aLatLng = null;
+                    double aLat = 0.0;
+                    double aLng = 0.0;
+                    String aTitle = "";
+                    MarkerOptions aMarkerOptions = new MarkerOptions();
+                    do {
+                        aTitle = cursor.getString(1);
+                        aLat = cursor.getDouble(2);
+                        aLng = cursor.getDouble(3);
+                        aLatLng = new LatLng(aLat, aLng);
+
+                        aMarkerOptions.title(aTitle);
+                        aMarkerOptions.position(aLatLng);
+                        googleMap.addMarker(aMarkerOptions);
+
+                    } while (cursor.moveToNext());
+                }
+
+
+/*
                 LatLng aLatLng = new LatLng(37.5750571,126.9777065);
                 markerOptions.position(aLatLng);
                 markerOptions.title("서울시 이동식 화장실");
                 googleMap.addMarker(markerOptions);
-
-                //move camera
-                googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+*/
+                //move camera To 광화문광장
+                googleMap.moveCamera(CameraUpdateFactory.newLatLng(SEOUL));
                 googleMap.animateCamera(CameraUpdateFactory.zoomTo(15));
             }
         }
@@ -357,7 +392,7 @@ public class MapsActivity extends Activity implements
     public void onLocationChanged(Location location) {
 
     }
-
+/* 딱히 필요 없을듯
     class MarkerItem {
         String name;
         double lat;
@@ -394,6 +429,6 @@ public class MapsActivity extends Activity implements
             this.name = name;
         }
     }
-
+*/
 }
 
